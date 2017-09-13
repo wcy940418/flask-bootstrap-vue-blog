@@ -1,0 +1,49 @@
+{% extends "index_base.html" %}
+{% block head %}
+    {{ super() }}
+    <link href={{ url_for('static',filename='styles/signin.css') }} rel="stylesheet">
+{% endblock %}
+{% block main_content %}
+    <div class="container">
+        <form id="registerForm" method="POST" class="form-signin">
+            <div class="alert alert-danger fade in" style="display: none;" id="passwordNotMatch">
+                <p>Passwords are not matched in twice input</p>
+            </div>
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-danger fade in"  id="serverError">
+                {{ message }}
+            </div>
+            {% endfor %}
+            <h3 class="form-signin-heading">Sign up new account</h3>
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input name="email" type="email" id="inputEmail" class="form-control form-input-top" placeholder="Email address" required autofocus>
+            <label for="inputUsername" class="sr-only">Username</label>
+            <input name="username" type="text" id="inputUsername" class="form-control form-input-between" placeholder="Username" required>
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input name="password" type="password" id="inputPassword" class="form-control form-input-between" placeholder="Password" required>
+            <label for="inputRepeatPassword" class="sr-only">Repeat Password</label>
+            <input name="password_repeated" type="password" id="inputRepeatPassword" class="form-control form-input-between" placeholder="Repeat Password" required>
+            <label for="inputMagicCode" class="sr-only">Magic Code</label>
+            <input name="magiccode" type="password" id="inputMagicCode" class="form-control form-input-bottom" placeholder="Magic Code" required>
+            <button class="btn btn-lg btn-primary btn-block" type="button" onclick="submitForm()">Register</button>
+        </form>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.10.0/js/md5.min.js"></script>
+    <script>
+        function submitForm() {
+            var password = $('#inputPassword').val();
+            var repeated_password = $('#inputRepeatPassword').val();
+            if (password !== repeated_password) {
+                $('#passwordNotMatch').show();
+                return;
+            }
+            $('#inputPassword').val(md5($('#inputPassword').val()));
+            $('#inputRepeatPassword').val(md5($('#inputRepeatPassword').val()));
+            document.getElementById("registerForm").submit();
+        }
+    </script>
+{% endblock %}

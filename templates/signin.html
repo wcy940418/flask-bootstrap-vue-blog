@@ -1,0 +1,37 @@
+{% extends "index_base.html" %}
+{% block head %}
+    {{ super() }}
+    <link href={{ url_for('static',filename='styles/signin.css') }} rel="stylesheet">
+{% endblock %}
+{% block main_content %}
+    <div class="container">
+        <form id="signinForm" method="POST" class="form-signin">
+            {% for message in get_flashed_messages() %}
+            <div class="alert alert-danger fade in" id="serverError">
+                {{ message }}
+            </div>
+            {% endfor %}
+            <h3 class="form-signin-heading">Sign in</h3>
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input name="email" type="email" id="inputEmail" class="form-control form-input-top" placeholder="Email address" required autofocus>
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input name="password" type="password" id="inputPassword" class="form-control form-input-bottom" placeholder="Password" required>
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" value="remember-me" name="remember"> Remember me
+              </label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="button" onclick="submitForm()">Sign in</button>
+        </form>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.10.0/js/md5.min.js"></script>
+    <script>
+        function submitForm() {
+            document.getElementById("inputPassword").value = md5(document.getElementById("inputPassword").value);
+            document.getElementById("signinForm").submit();
+        }
+    </script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends "bootstrap/base.html" %}
+{% block head %}
+    {{ super() }}
+    <script src="https://unpkg.com/vue"></script>
+{% endblock %}
+{% block title %}Troy's Blog{% endblock %}
+{% block navbar %}
+ <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                    data-target="#navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Troy's Blog</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="/">Home</a></li>
+                <li><a>Resume</a></li>
+                <li><a>Contact</a></li>
+                <li>
+                    <a href="https://weather.com/">
+                        <div id="weather-widget" >
+                            {% raw %}
+                            {{local_weather}}
+                            {% endraw %}
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% endblock %}
+
+{% block content %}
+    {% block main_content %}
+    {% endblock %}
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script type="text/javascript">
+        'use_strict';
+        var weather_widget = new Vue({
+            el: "#weather-widget",
+            data: {
+                local_weather: "loading..."
+            }
+        });
+        function setCookie(name,value) {
+            var Days = 30;
+            var exp = new Date();
+            exp.setTime(exp.getTime() + Days*24*60*60*1000);
+            document.cookie = name + "="+ encodeURIComponent (value) + ";expires=" + exp.toGMTString();
+        }
+        function getCookie(name) {
+            var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
+
+            if(arr=document.cookie.match(reg))
+
+                return decodeURIComponent(arr[2]);
+            else
+                return null;
+        }
+        function delCookie(name) {
+            var exp = new Date();
+            exp.setTime(exp.getTime() - 1);
+            var cval=getCookie(name);
+            if(cval!=null)
+                document.cookie= name + "="+cval+";expires="+exp.toGMTString();
+        }
+        function getWeather(position) {
+            var jsonHttp;
+            jsonHttp = new XMLHttpRequest();
+            jsonHttp.onreadystatechange = function () {
+                if (jsonHttp.readyState == 4 && jsonHttp.status == 200) {
+                    var bayRidgeWeather = JSON.parse(jsonHttp.responseText);
+                    weather_widget.local_weather = bayRidgeWeather['overview']
+                }
+            };
+            if (position.coords) {
+                jsonHttp.open("GET", "api/weather?lat=" + position.coords.latitude
+                    + "&lon=" + position.coords.longitude, true);
+                setCookie('local_position', position.coords.latitude + ','
+                    + position.coords.longitude);
+            } else {
+                var position_ = position.split(",");
+                jsonHttp.open("GET", "api/weather?lat=" + position_[0] + "&lon=" + position_[1], true);
+            }
+            jsonHttp.send();
+        }
+        function getLocalWeather() {
+            position_ = getCookie('local_position');
+            if (position_ && false) {
+                getWeather(position_);
+            } else {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(getWeather);
+                }
+            }
+        }
+        getLocalWeather()
+    </script>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends "index_base.html" %}
+{% block head %}
+    {{ super() }}
+    <link href={{ url_for('static',filename='styles/blog.css') }} rel="stylesheet">
+{% endblock %}
+{% block main_content %}
+    <div class="container">
+        <div class="blog-header">
+            <h1 class="blog-title">Troy's Blog</h1>
+            <p class="lead blog-description">Seeking higher</p>
+        </div>
+        <div class="row">
+            <div class="col-sm-8 blog-main" id="posts">
+                {% raw %}
+                <div class="blog-post" v-for="post in posts">
+                    <h2 class="blog-post-title">{{ post.title }}</h2>
+                    <p class="blog-post-meta">{{ post.last_update_time }}</p>
+                    <p>{{ post.content }}</p>
+                </div>
+                {% endraw %}
+            </div><!-- end of main-->
+            <div class="col-sm-3 blog-sidebar col-sm-offset-1" id="sidebar">
+                <div class="sidebar-module sidebar-module-inset">
+                    <h4>About</h4>
+                    <p>Chaoyue Wang, study in New York University</p>
+                </div>
+                {% raw %}
+                <div class="sidebar-module">
+                    <h4>Latest post</h4>
+                    <ol class="list-unstyled">
+                        <li v-for="title in latests">
+                            <button type="button" class="btn btn-link sidebar-hlink">
+                                {{ title }}
+                            </button>
+                        </li>
+                    </ol>
+                </div>
+                <div class="sidebar-module">
+                    <h4>Post date</h4>
+                    <ol class="list-unstyled">
+                        <li v-for="date in dates">
+                            <button type="button"
+                                    class="btn btn-link sidebar-hlink"
+                                    onclick="onDateClicked(this.value)"
+                                    v-bind:value="date.num">
+                                {{ date.full }}
+                            </button>
+                        </li>
+                    </ol>
+                </div>
+                <div class="sidebar-module">
+                    <h4>Categories</h4>
+                    <ol class="list-unstyled">
+                        <li v-for="cate in categories">
+                            <button type="button"
+                                    class="btn btn-link sidebar-hlink"
+                                    onclick="onCateClicked(this.value)"
+                                    v-bind:value="cate">
+                                {{ cate }}
+                            </button>
+                        </li>
+                    </ol>
+                </div>
+                <div class="sidebar-module">
+                    <h4>Tags</h4>
+                    <ol class="list-unstyled">
+                        <li v-for="tag in tags">
+                            <button type="button"
+                                    class="btn btn-info btn-xs"
+                                    onclick="onTagClicked(this.value)"
+                                    v-bind:value="tag">
+                                {{ tag }}
+                            </button>
+                        </li>
+                    </ol>
+                </div>
+                {% endraw %}
+            </div><!-- end of side bar-->
+        </div>
+    </div><!-- end of main container -->
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        var posts = new Vue({
+            el: "#posts",
+            data: {
+                posts:[]
+
+            }
+        });
+        var sidebar = new Vue({
+            el: '#sidebar',
+            data: {
+                latests:[],
+                tags:[],
+                categories: [],
+                dates: []
+            }
+        });
+        $.get('api/post?num=10&lan=cn', function(data, status) {
+            if (status == 'success') {
+                posts.posts = data.posts;
+            }
+        });
+        $.get('api/posts-meta?attr=all&lan=cn', function(data, status) {
+            if (status == 'success') {
+                sidebar.tags = data.tags;
+                var dates = [];
+                for(var i = 0; i < data.dates.length; i++) {
+                    dates.push({
+                        'full': convertDate(data.dates[i]),
+                        'num': data.dates[i]
+                    });
+                }
+                sidebar.dates = dates;
+                sidebar.categories = data.categories;
+            }
+        });
+        function onTagClicked(text) {
+            $.get('api/post?num=10&lan=cn&tag=' + text, function(data, status) {
+                if (status == 'success') {
+                    posts.posts = data.posts;
+                }
+            });
+        }
+        function onCateClicked(text) {
+            $.get('api/post?num=10&lan=cn&cat=' + text, function(data, status) {
+                if (status == 'success') {
+                    posts.posts = data.posts;
+                }
+            });
+        }
+{#        function onLatestClicked(text) {#}
+{#            $.get('api/post?num=10&lan=cn&', function(data, status) {#}
+{#                if (status == 'success') {#}
+{#                    posts.posts = data.posts;#}
+{#                }#}
+{#            });#}
+{#        }#}
+        function convertDate(date) {
+            var date_ = date.split('-');
+            var year = String(date_[0]);
+            var month = "Jan";
+            switch(Number(date_[1])) {
+                case 1: month = 'January'; break;
+                case 2: month = 'February'; break;
+                case 3: month = 'March'; break;
+                case 4: month = 'April'; break;
+                case 5: month = 'May'; break;
+                case 6: month = 'June'; break;
+                case 7: month = 'July'; break;
+                case 8: month = 'August'; break;
+                case 9: month = 'September'; break;
+                case 10: month = 'October'; break;
+                case 11: month = 'November'; break;
+                case 12: month = 'December'; break;
+                default : break;
+            }
+            return month + " " + year;
+        }
+        function onDateClicked(text) {
+            $.get('api/post?num=10&lan=cn&date_month=' + text, function(data, status) {
+                if (status == 'success') {
+                    posts.posts = data.posts;
+                }
+            });
+        }
+
+    </script>
+{% endblock %}
