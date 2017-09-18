@@ -72,6 +72,7 @@ class PostMultiLanguage(Base):
     id = Column(Integer, primary_key=True)
     title = Column(String(255), nullable=False, index=True)
     content = Column(Text)
+    overview = Column(Text)
     language_id = Column(String(64), ForeignKey('languages.language'))
     language = relationship('Language', backref='posts')
     post_id = Column(Integer, ForeignKey('posts.id'))
@@ -115,15 +116,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Blog db utility')
     parser.add_argument('-c', '--create', action='store_true', help='Initial all tables')
     parser.add_argument('-d', '--drop',action='store_true', help='Drop all tables')
-    parser.add_argument('-d', '--db', type=str, default=None, help='Optional db path')
+    parser.add_argument('-u', '--uri', type=str, default=None, help='Optional db path')
     args = parser.parse_args()
-    if args.db:
-        engine = create_engine(args.db, echo=True)
+    if args.uri:
+        engine = create_engine(args.uri, echo=True)
     elif DEFAULT_DB_URI:
         engine = create_engine(DEFAULT_DB_URI, echo=True)
     else:
         print "please provide database uri"
-        exit(1);
+        exit(1)
     if args.create:
         print "Preparing for creating the whole blog database"
         Base.metadata.drop_all(engine)

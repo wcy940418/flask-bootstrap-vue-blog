@@ -2,9 +2,10 @@ from db_controller import *
 import random
 from faker import Factory
 import datetime
+import sys
 
 maker = Factory.create()
-session = createSession()
+session = createSession(sys.argv[1])
 
 start = datetime.datetime(year=2010, month=01, day=01)
 end = datetime.datetime.now()
@@ -31,6 +32,7 @@ for i in range(10):
     post_content = PostMultiLanguage(
         title=maker.sentence(),
         content=' '.join(maker.sentences(nb=random.randint(10, 20))),
+        overview=' '.join(maker.sentences(nb=random.randint(3, 5))),
         language=random.choice(languages),
         post=post,
         last_update_time=random_date(start, end)

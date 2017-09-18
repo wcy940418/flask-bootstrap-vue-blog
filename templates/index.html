@@ -15,7 +15,7 @@
                 <div class="blog-post" v-for="post in posts">
                     <h2 class="blog-post-title">{{ post.title }}</h2>
                     <p class="blog-post-meta">{{ post.last_update_time }}</p>
-                    <p>{{ post.content }}</p>
+                    <p>{{ post.overview }}</p>
                 </div>
                 {% endraw %}
             </div><!-- end of main-->
@@ -98,12 +98,12 @@
                 dates: []
             }
         });
-        $.get('api/post?num=10&lan=cn', function(data, status) {
+        $.get('api/post?num=10&lan=' + language, function(data, status) {
             if (status == 'success') {
                 posts.posts = data.posts;
             }
         });
-        $.get('api/posts-meta?attr=all&lan=cn', function(data, status) {
+        $.get('api/posts-meta?attr=all&lan=' + language, function(data, status) {
             if (status == 'success') {
                 sidebar.tags = data.tags;
                 var dates = [];
@@ -118,14 +118,14 @@
             }
         });
         function onTagClicked(text) {
-            $.get('api/post?num=10&lan=cn&tag=' + text, function(data, status) {
+            $.get('api/post?num=10&tag=' + text + '&lan=' + language, function(data, status) {
                 if (status == 'success') {
                     posts.posts = data.posts;
                 }
             });
         }
         function onCateClicked(text) {
-            $.get('api/post?num=10&lan=cn&cat=' + text, function(data, status) {
+            $.get('api/post?num=10&cat=' + text + '&lan=' + language, function(data, status) {
                 if (status == 'success') {
                     posts.posts = data.posts;
                 }
@@ -160,7 +160,7 @@
             return month + " " + year;
         }
         function onDateClicked(text) {
-            $.get('api/post?num=10&lan=cn&date_month=' + text, function(data, status) {
+            $.get('api/post?num=10&date_month=' + text + '&lan=' + language, function(data, status) {
                 if (status == 'success') {
                     posts.posts = data.posts;
                 }

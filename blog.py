@@ -24,10 +24,20 @@ if 'BLOG_DB_URI' in os.environ:
 app.config['OMW_API_KEY'] = '73323744bf4b7300b711576a9e8b74eb'
 bootstrap = Bootstrap(app)
 
+def check_sign_status(sess):
+    if 'username' in sess:
+        return url_for('user_signout'), "Sign out"
+    else:
+        return url_for('user_signin'), "Sign in"
 
-
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
+    lan = request.args.get('lan', None)
+    if lan:
+        if lan == 'en':
+            session['language'] = 'en'
+        elif lan == 'cn':
+            session['language'] = 'cn'
     if 'language' not in session:
         session['language'] = 'en'
     return render_template('index.html')
@@ -58,7 +68,7 @@ def user_signin():
             password = request.form['password']
             remember = True if 'remember-me' in request.form.getlist('remember') else False
             if email is None or password is None or remember is None:
-                flash('Please enter valid information')
+                flash('Please enter valid information')    
                 return render_template('signin.html'), 400
             user = db_session.query(User).filter_by(email=email).first()
             if user is not None:
@@ -68,10 +78,10 @@ def user_signin():
                         session.permanent = True
                     return redirect(url_for('log_status'))
                 else:
-                    flash('Invalid password or email')
+                    flash('Invalid password or email')      
                     return render_template('signin.html'), 400
             else:
-                flash('Invalid password or email')
+                flash('Invalid password or email') 
                 return render_template('signin.html'), 400
         else:
             return render_template('signin.html')
@@ -180,6 +190,7 @@ def api_posts():
                     'last_update_time': post_content.last_update_time.strftime("%B %d, %Y"),
                     'author': post_content.post.author.username,
                     'content': post_content.content,
+                    'overview': post_content.overview,
                     'category': post_content.post.category.name,
                     'tags': [tag.name for tag in post_content.post.tags]
                 }
@@ -207,6 +218,7 @@ def api_posts():
                         'last_update_time': post_content.last_update_time.strftime("%B %d, %Y"),
                         'author': post_content.post.author.username,
                         'content': post_content.content,
+                        'overview': post_content.overview,
                         'category': post_content.post.category.name,
                         'tags': [tag.name for tag in post_content.post.tags]
                     }
@@ -233,15 +245,11 @@ def api_posts_meta():
                 .join(Language)
                 .filter(Language.language == lan)
                 .order_by(Category.name).all()]
-            # tags = [tag.name for tag in db_session.query(Tag)
-            #     .filter(Tag.posts.any())
-            #     .join(PostMultiLanguage)
-            #     .join(Language)
-            #     .order_by(Tag.name)
-            #     .filter(Language.language == lan)
-            #     .all()]
             tags = [tag.name for tag in db_session.query(Tag)
-                .order_by(Tag.name)
+                .join(Tag.posts)
+                .join(PostMultiLanguage)
+                .join(Language)
+                .filter_by(language=lan)
                 .all()]
             dates_ = [date.last_update_time for date in db_session.query(PostMultiLanguage)
                 .join(Language)
@@ -260,7 +268,10 @@ def api_posts_meta():
             }), 200
         elif attr == 'tags':
             tags = [tag.name for tag in db_session.query(Tag)
-                .order_by(Tag.name)
+                .join(Tag.posts)
+                .join(PostMultiLanguage)
+                .join(Language)
+                .filter_by(language=lan)
                 .all()]
             return jsonify({
                 'tags': tags

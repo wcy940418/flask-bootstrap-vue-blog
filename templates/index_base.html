@@ -1,11 +1,17 @@
 {% extends "bootstrap/base.html" %}
 {% block head %}
     {{ super() }}
+    <style>
+    body {
+      font-family: Georgia, "Times New Roman", Times, serif;
+      padding-top: 70px;
+    }
+    </style>
     <script src="https://unpkg.com/vue"></script>
 {% endblock %}
 {% block title %}Troy's Blog{% endblock %}
 {% block navbar %}
- <nav class="navbar navbar-inverse">
+ <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container-fluid">
         <div class="navbar-header">
             <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
@@ -30,6 +36,47 @@
                             {% endraw %}
                         </div>
                     </a>
+                </li>
+            </ul>
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href=
+                {% if 'username' in session %}
+                {{ url_for('user_signout') }}
+                {% else %}
+                {{ url_for('user_signin') }}
+                {% endif %}
+                >
+                {% if 'username' in session %}
+                Sign out
+                {% else %}
+                Sign in
+                {% endif %}
+                </a></li>
+                <li class="dropdown">
+                    <a class="dropdown-toggle" href="#"
+                            data-toggle="dropdown" id="lan">
+                        {% if 'language' not in session or session['language'] == 'en' %}
+                        English
+                        {% elif session['language'] == 'cn' %}
+                        Chinese
+                        {% endif %}
+                        <span class="caret"></span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a href=
+                        {% if session['language'] == 'cn' %}
+                        {{ url_for('index', lan='en') }}
+                        {% elif 'language' not in session or session['language'] == 'en' %}
+                        {{ url_for('index', lan='cn') }}
+                        {% endif %}
+                        >
+                            {% if session['language'] == 'cn' %}
+                            English
+                            {% elif 'language' not in session or session['language'] == 'en' %}
+                            Chinese
+                            {% endif %}
+                        </a></li>
+                    </ul>
                 </li>
             </ul>
         </div>
@@ -105,6 +152,12 @@
                 }
             }
         }
-        getLocalWeather()
+        getLocalWeather();
+        var language = 'en';
+        {% if session['language'] == 'cn' %}
+        language = 'cn';
+        {% elif 'language' not in session or session['language'] == 'en' %}
+        language = 'en';
+        {% endif %}
     </script>
 {% endblock %}
