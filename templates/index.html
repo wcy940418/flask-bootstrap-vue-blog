@@ -13,7 +13,9 @@
             <div class="col-sm-8 blog-main" id="posts">
                 {% raw %}
                 <div class="blog-post" v-for="post in posts">
-                    <h2 class="blog-post-title">{{ post.title }}</h2>
+                    <h2 class="blog-post-title">
+                        <a v-bind:href="getPostLink(post)" class="blog-title-a">{{ post.title }}</a>
+                    </h2>
                     <p class="blog-post-meta">{{ post.last_update_time }}</p>
                     <p>{{ post.overview }}</p>
                 </div>
@@ -22,7 +24,7 @@
             <div class="col-sm-3 blog-sidebar col-sm-offset-1" id="sidebar">
                 <div class="sidebar-module sidebar-module-inset">
                     <h4>About</h4>
-                    <p>Chaoyue Wang, study in New York University</p>
+                    <p>Chaoyue Wang, study in New York University.</p>
                 </div>
                 {% raw %}
                 <div class="sidebar-module">
@@ -87,6 +89,11 @@
             data: {
                 posts:[]
 
+            },
+            methods: {
+              getPostLink: function(post){
+                  return window.location.protocol + '//' + window.location.host + '/p/' + String(post.id);
+              }
             }
         });
         var sidebar = new Vue({

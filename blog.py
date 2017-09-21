@@ -46,6 +46,10 @@ def index():
 def view_post(postid):
     pass
 
+@app.route('/edit_post', methods=['GET'])
+def edit_post():
+    return render_template('edit_post.html')
+
 @app.route('/user/<username>', methods=['GET'])
 def user_panel(username):
     return redirect(url_for('index'))
