@@ -3,7 +3,6 @@
     {{ super() }}
     <style>
     body {
-      font-family: Georgia, "Times New Roman", Times, serif;
       padding-top: 70px;
     }
     </style>
@@ -38,20 +37,25 @@
                     </a>
                 </li>
             </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li><a href=
+            <ul class="nav navbar-nav navbar-right" id="control-panel">
+{#                <li><a href=#}
+{#                {% if 'username' in session %}#}
+{#                {{ url_for('user_signout') }}#}
+{#                {% else %}#}
+{#                {{ url_for('user_signin') }}#}
+{#                {% endif %}#}
+{#                >#}
+{#                {% if 'username' in session %}#}
+{#                Sign out#}
+{#                {% else %}#}
+{#                Sign in#}
+{#                {% endif %}#}
+{#                </a></li>#}
                 {% if 'username' in session %}
-                {{ url_for('user_signout') }}
-                {% else %}
-                {{ url_for('user_signin') }}
-                {% endif %}
-                >
-                {% if 'username' in session %}
-                Sign out
-                {% else %}
-                Sign in
-                {% endif %}
+                <li><a href={{ url_for('main.user_signout') }}>
+                    Sign out
                 </a></li>
+                {% endif %}
                 <li class="dropdown">
                     <a class="dropdown-toggle" href="#"
                             data-toggle="dropdown" id="lan">
@@ -65,9 +69,9 @@
                     <ul class="dropdown-menu">
                         <li><a href=
                         {% if session['language'] == 'cn' %}
-                        {{ url_for('index', lan='en') }}
+                        {{ url_for('main.index', lan='en') }}
                         {% elif 'language' not in session or session['language'] == 'en' %}
-                        {{ url_for('index', lan='cn') }}
+                        {{ url_for('main.index', lan='cn') }}
                         {% endif %}
                         >
                             {% if session['language'] == 'cn' %}
@@ -100,28 +104,6 @@
                 local_weather: "loading..."
             }
         });
-        function setCookie(name,value) {
-            var Days = 30;
-            var exp = new Date();
-            exp.setTime(exp.getTime() + Days*24*60*60*1000);
-            document.cookie = name + "="+ encodeURIComponent (value) + ";expires=" + exp.toGMTString();
-        }
-        function getCookie(name) {
-            var arr,reg=new RegExp("(^| )"+name+"=([^;]*)(;|$)");
-
-            if(arr=document.cookie.match(reg))
-
-                return decodeURIComponent(arr[2]);
-            else
-                return null;
-        }
-        function delCookie(name) {
-            var exp = new Date();
-            exp.setTime(exp.getTime() - 1);
-            var cval=getCookie(name);
-            if(cval!=null)
-                document.cookie= name + "="+cval+";expires="+exp.toGMTString();
-        }
         function getWeather(position) {
             var jsonHttp;
             jsonHttp = new XMLHttpRequest();
@@ -134,8 +116,6 @@
             if (position.coords) {
                 jsonHttp.open("GET", "api/weather?lat=" + position.coords.latitude
                     + "&lon=" + position.coords.longitude, true);
-                setCookie('local_position', position.coords.latitude + ','
-                    + position.coords.longitude);
             } else {
                 var position_ = position.split(",");
                 jsonHttp.open("GET", "api/weather?lat=" + position_[0] + "&lon=" + position_[1], true);
@@ -143,13 +123,8 @@
             jsonHttp.send();
         }
         function getLocalWeather() {
-            position_ = getCookie('local_position');
-            if (position_ && false) {
-                getWeather(position_);
-            } else {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(getWeather);
-                }
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(getWeather);
             }
         }
         getLocalWeather();

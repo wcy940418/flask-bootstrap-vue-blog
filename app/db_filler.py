@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from db_controller import *
 import random
 from faker import Factory

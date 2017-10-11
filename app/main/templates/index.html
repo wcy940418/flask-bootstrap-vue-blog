@@ -1,7 +1,7 @@
 {% extends "index_base.html" %}
 {% block head %}
     {{ super() }}
-    <link href={{ url_for('static',filename='styles/blog.css') }} rel="stylesheet">
+    <link href={{ url_for('main.static',filename='styles/blog.css') }} rel="stylesheet">
 {% endblock %}
 {% block main_content %}
     <div class="container">
@@ -92,7 +92,7 @@
             },
             methods: {
               getPostLink: function(post){
-                  return window.location.protocol + '//' + window.location.host + '/p/' + String(post.id);
+                  return window.location.protocol + '//' + window.location.host + '/p?id=' + String(post.id);
               }
             }
         });
@@ -173,6 +173,8 @@
                 }
             });
         }
-
+        {% if 'username' in session %}
+            $('#control-panel').prepend('<li><a href="{{ url_for('main.edit_post', _external=True) }}"> New Post </a></li>');
+        {% endif %}
     </script>
 {% endblock %}

@@ -14,7 +14,7 @@
     {{ super() }}
     <script>
     var timer = setTimeout(function() {
-        window.location = '{{ url_for('index', _external=True) }}';
+        window.location = '{{ new_location }}';
     }, 3000)
     </script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Column, String, Integer, Text, Table, ForeignKey, DateTime, create_engine
-from sqlalchemy.orm import sessionmaker, relationship
+from sqlalchemy.orm import sessionmaker, relationship, scoped_session
 from itsdangerous import (TimedJSONWebSignatureSerializer
                           as Serializer, BadSignature, SignatureExpired)
 import os
@@ -106,8 +106,15 @@ def createSession(uri=None):
     if uri == None:
         uri = DEFAULT_DB_URI
     engine = create_engine(uri)
-    Session = sessionmaker(bind=engine)
+    Session = sessionmaker(bind=engine, autoflush=False)
     session = Session()
+    return session
+
+def createScopedSession(uri=None):
+    if uri == None:
+        uri = DEFAULT_DB_URI
+    engine = create_engine(uri)
+    session = scoped_session(sessionmaker(bind=engine, autoflush=False))
     return session
 
 if __name__ == "__main__":

@@ -9,6 +9,10 @@ body {
     }
 }
 
+.manager {
+    padding-top: 10px;
+}
+
 label {
     margin-top: 10px;
 }
@@ -17,7 +21,6 @@ label {
     padding-top: 10px;
 }
 
-.sidebar-module {
-    padding: 15px;
-    margin: 0 -15px 15px;
+.status-bar-message {
+    color: #777;
 }

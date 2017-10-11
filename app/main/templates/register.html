@@ -1,7 +1,7 @@
 {% extends "index_base.html" %}
 {% block head %}
     {{ super() }}
-    <link href={{ url_for('static',filename='styles/signin.css') }} rel="stylesheet">
+    <link href={{ url_for('main.static',filename='styles/signin.css') }} rel="stylesheet">
 {% endblock %}
 {% block main_content %}
     <div class="container">

@@ -1,0 +1,32 @@
+{% extends "index_base.html" %}
+{% block head %}
+    {{ super() }}
+    <link href={{ url_for('main.static',filename='styles/post.css') }} rel="stylesheet">
+{% endblock %}
+{% block main_content %}
+    <div class="container">
+        <div class="row">
+            <h1>{{ post.title }}</h1>
+            <p class="metadata">{{ post.last_update_time }}</p>
+            {{ post.content | safe }}
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    {{ super() }}
+    <script>
+    {% if 'username' in session %}
+        $('#control-panel').prepend('<li><a href="{{ edit_link }}"> Edit </a></li>');
+        $('#control-panel').prepend('<li><a href="#" onclick="delete_post()"> Delete </a></li>');
+        function delete_post() {
+            var deletion_request = JSON.stringify({method:"delete", post_id:{{ post_id }}, language:language});
+            $.post('api/post', deletion_request, function (data, status) {
+                if (status === 'success') {
+                    window.location = 'status?msg='+ data.status + ', redirect to index in 3 seconds';
+                }
+            })
+        }
+    {% endif %}
+    </script>
+{% endblock %}

@@ -1,0 +1,343 @@
+{% extends "bootstrap/base.html" %}
+{% block head %}
+    {{ super() }}
+    <script src="https://cdn.ckeditor.com/4.7.3/standard/ckeditor.js"></script>
+    <link href={{ url_for('main.static',filename='styles/editor.css') }} rel="stylesheet">
+    <link href={{ url_for('main.static',filename='styles/common.css') }} rel="stylesheet">
+    <script src="https://unpkg.com/vue"></script>
+{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="manager" id="manager">
+                    <span>Category</span>
+                    <div class="btn-group">
+                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span id="cat-btn">Category</span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu cat-selector">
+                            {% raw %}
+                            <li v-for="cat in cats"><a href="#" v-bind:data-value="cat">{{ cat }}</a></li>
+                            {% endraw %}
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#add-new-cat" class="add-new-cat" data-toggle="modal">Add new category</a></li>
+                            <li><a href="#del-cat" class="del-cat" data-toggle="modal">Delete category</a></li>
+                        </ul>
+                    </div>
+                    <span>Tags</span>
+                    <div class="btn-group">
+                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span id="tags-btn">Tags</span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu tags-selector">
+                            {% raw %}
+                            <li v-for="tag in tags">
+                                <a href="#" v-bind:data-value="tag">
+                                    <input type="checkbox"/>&nbsp; {{ tag }}
+                                </a>
+                            </li>
+                            {% endraw %}
+                            <li role="separator" class="divider"></li>
+                            <li><a href="#add-new-tag" data-toggle="modal" class="add-new-tag">Add new tag</a></li>
+                            <li><a href="#del-tag" data-toggle="modal" class="del-tag">Delete tag</a></li>
+                        </ul>
+                    </div>
+                    <span class="lang_selector">Language</span>
+                    <div class="btn-group lang_selector">
+                        <button class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <span id="language-btn">Languages</span> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu language-selector">
+                            {% raw %}
+                            <li v-for="language in languages">
+                                <a href="#" v-bind:data-value="language">
+                                    {{ language }}
+                                </a>
+                            </li>
+                            {% endraw %}
+                        </ul>
+                    </div>
+                </div>
+                <label for="post-title">Title</label>
+                <input type="text" class="form-control" id="post-title" placeholder="Title" />
+                <label for="post-overview">Overview</label>
+                <textarea id="post-overview" class="form-control" rows="4"></textarea>
+                <label for="maineditor">Main body</label>
+                <textarea id="maineditor" row="10" cols="80"></textarea>
+                <div class="control-btn">
+                    <div class="pull-left">
+                        <p class="status-bar-message"></p>
+                    </div>
+                    <div class="pull-right">
+                        <button class="btn btn-default">Cancel</button>
+                        <button class="btn btn-primary" onclick="onSave(false)">Save Draft</button>
+                        <button class="btn btn-primary" onclick="onSave(true)">Save</button>
+                    </div>
+                </div>
+                <div class="modal fade" id="add-new-tag" tabindex="-1" role="dialog" aria-labelledby="add-tag" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Add new tag</h4>
+                            </div>
+                            <div class="modal-body">
+                                <label for="tag-name">New tag name</label>
+                                <input type="text" id="tag-name" placeholder="Tag" class="form-control" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="add-tag-submit-btn" onclick="addTag()">Submit</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal -->
+                </div>
+                <div class="modal fade" id="add-new-cat" tabindex="-1" role="dialog" aria-labelledby="add-cat" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                                <h4 class="modal-title">Add new category</h4>
+                            </div>
+                            <div class="modal-body">
+                                <label for="tag-name">New category name</label>
+                                <input type="text" id="cat-name" placeholder="Category" class="form-control" />
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                                <button type="button" class="btn btn-primary" id="add-cat-submit-btn" onclick="addCat()">Submit</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+        var editor = CKEDITOR.replace('maineditor');
+        var manager_app = new Vue({
+            el: "#manager",
+            data: {
+                tags:[],
+                cats:[],
+                languages:[]
+            }
+        });
+        var post_id = null;
+        var post = new Object();
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+        function loadManager() {
+
+            $.get('api/posts-meta', {attr:'all'}, function(data, event) {
+                if (event === 'success') {
+                    manager_app.cats = data.categories;
+                    manager_app.tags = data.tags;
+                    manager_app.languages = data.languages;
+                }
+            });
+        }
+        function addTag() {
+            var tag_name = $('#tag-name').val();
+            $('#add-tag-submit-btn').addClass('disabled').html('<div class="loader-14px" />');
+            $.post('api/posts-meta', JSON.stringify({method:'add_tag', name:tag_name}), function (data, event) {
+                if (event === 'success') {
+                    $('#add-tag-submit-btn')
+                        .addClass('btn-success')
+                        .addClass('disabled')
+                        .removeClass('btn-primary')
+                        .html('Success');
+                    setTimeout(function(){
+                        $('#add-new-tag').modal('hide');
+                        $('#add-tag-submit-btn').attr("class", "btn btn-primary").html('Submit');
+                    }, 1000);
+                    loadManager();
+                    setManagerDefaultValue();
+                }
+            }, 'json');
+        }
+        function addCat() {
+            var cat_name = $('#cat-name').val();
+            $('#add-cat-submit-btn').addClass('disabled').html('<div class="loader-14px" />');
+            $.post('api/posts-meta', JSON.stringify({method:'add_cat',name:cat_name}), function (data, event) {
+                if (event === 'success') {
+                    $('#add-cat-submit-btn')
+                        .addClass('btn-success')
+                        .addClass('disabled')
+                        .removeClass('btn-primary')
+                        .html('Success');
+                    setTimeout(function(){
+                        $('#add-new-cat').modal('hide');
+                        $('#add-cat-submit-btn').attr("class", "btn btn-primary").html('Submit');
+                    }, 1000);
+                    loadManager();
+                    setManagerDefaultValue();
+                }
+            }, 'json');
+        }
+        function setManagerDefaultValue() {
+            $("#cat-btn").text(post.selected_cat);
+            $('.tags-selector a:not(.add-new-tag)').each(function() {
+                var val = $(this).attr('data-value'),
+                    $inp = $(this).find('input');
+                if (post.selected_tags.indexOf(val) > -1) {
+                    setTimeout( function() { $inp.prop( 'checked', true ) }, 0);
+                } else {
+                    setTimeout( function() { $inp.prop( 'checked', false ) }, 0);
+                }
+            });
+        }
+        function localSave(message) {
+            post.title = $('#post-title').val();
+            post.overview = $('#post-overview').val();
+            post.content = editor.getData();
+            if (message === true) {
+                $('.status-bar-message').html("Modification has been saved locally");
+                setTimeout(function () {
+                    $('.status-bar-message').html("");
+                }, 1000);
+            }
+
+        }
+        function onSave(jump) {
+            var submitDict = new Object();
+            if (post_id) {
+                submitDict.post_id = post_id;
+                submitDict.method = 'change';
+            } else {
+                submitDict.method = 'new';
+            }
+            console.log(submitDict.method);
+            localSave(false);
+            submitDict.language = post.selected_lan;
+            submitDict.title = post.title;
+            submitDict.overview = post.overview;
+            submitDict.content = post.content;
+            submitDict.tags = post.selected_tags;
+            submitDict.cat = post.selected_cat;
+            if (jump === true) {
+                $.post('api/post', JSON.stringify(submitDict), function (data, status) {
+                    if (status === 'success') {
+                        window.location = 'status?msg=' + data.status + ', redirect to index in 3 seconds';
+                    }
+                }, 'json');
+            } else {
+                if (!post_id) {
+                    $.post('api/post', JSON.stringify(submitDict), function (data, status) {
+                        if (status === 'success') {
+                            $('.status-bar-message').html(data.status);
+                            post_id = data.post_id;
+                            setTimeout(function () {
+                                $('.status-bar-message').html("");
+                            }, 3000);
+                        }
+                    }, 'json');
+                } else {
+                    $.post('api/post', JSON.stringify(submitDict), function (data, status) {
+                        if (status === 'success') {
+                            $('.status-bar-message').html(data.status);
+                            setTimeout(function () {
+                                $('.status-bar-message').html("");
+                            }, 3000);
+                        }
+                    }, 'json');
+                }
+            }
+        }
+        function updateEditor() {
+            $('#post-title').val(post.title);
+            $('#post-overview').val(post.overview);
+            editor.setData(post.content);
+            setManagerDefaultValue();
+        }
+        function loadPost(post_id, lang) {
+            $.get('api/post', {postid: post_id, lan:lang}, function (data, event) {
+                if (event === 'success') {
+                    post = data.posts[0];
+                    post.selected_tags = post.tags;
+                    post.selected_cat = post.category;
+                    post.selected_lan = post.language;
+                    $('.lang_selector').hide();
+                    updateEditor();
+                }
+            });
+        }
+        function initPost() {
+            post.title = "";
+            post.overview = "";
+            post.content = "";
+            post.selected_tags = [];
+            post.selected_cat = "";
+            post.selected_lan = "";
+            post.tags = [];
+            post.category = "";
+            post.language = "";
+        }
+        function init() {
+            $('.tags-selector').on('click', 'a:not(.add-new-tag)', function(event) {
+               var $target = $( event.currentTarget ),
+               val = $target.attr( 'data-value' ),
+               $inp = $target.find( 'input' ),
+               idx;
+
+               if ( ( idx = post.selected_tags.indexOf( val ) ) > -1 ) {
+                  post.selected_tags.splice( idx, 1 );
+                  setTimeout( function() { $inp.prop( 'checked', false ) }, 0);
+               } else {
+                  post.selected_tags.push( val );
+                  setTimeout( function() { $inp.prop( 'checked', true ) }, 0);
+               }
+               $( event.target ).blur();
+               console.log( post.selected_tags );
+               return false;
+            });
+
+            $('.cat-selector').on('click', 'a:not(.add-new-cat)', function (event) {
+                var $target = $(event.currentTarget),
+                    val = $target.attr('data-value');
+                console.log(val);
+                post.selected_cat = val;
+                $("#cat-btn").text(val);
+                $( event.target ).blur();
+                return true;
+            });
+
+            $('.language-selector').on('click', 'a', function (event) {
+                var $target = $(event.currentTarget),
+                    val = $target.attr('data-value');
+                console.log(val);
+                post.selected_lan = val;
+                $("#language-btn").text(val);
+                $( event.target ).blur();
+                return true;
+            });
+            loadManager();
+            post_id = getParameterByName('p');
+            var lan = getParameterByName('lan');
+            if (post_id !== null) {
+                if (lan !== null) {
+                    loadPost(post_id, lan);
+                } else {
+                    loadPost(post_id, language);
+                }
+            } else {
+                initPost();
+            }
+            setInterval(function () {
+                localSave(true);
+            }, 60000);
+        }
+        $().ready(init);
+    </script>
+{% endblock %}
