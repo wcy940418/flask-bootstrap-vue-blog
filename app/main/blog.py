@@ -39,11 +39,11 @@ def override_url_for():
     return dict(url_for=dated_url_for)
 
 def dated_url_for(endpoint, **values):
-    if endpoint == 'static':
+    if endpoint == 'main.static':
         filename = values.get('filename', None)
         if filename:
-            file_path = os.path.join(app.root_path,
-                                     endpoint, filename)
+            file_path = os.path.join(current_app.root_path,
+                                     endpoint.replace('.', '/'), filename)
             values['q'] = int(os.stat(file_path).st_mtime)
     return url_for(endpoint, **values)
 
@@ -58,6 +58,10 @@ def index():
     if 'language' not in session:
         session['language'] = 'en'
     return render_template('index.html')
+
+@main.route('/about_me', methods=['GET'])
+def about():
+    return render_template('about_me.html')
 
 @main.route('/p', methods=['GET'])
 def view_post():
