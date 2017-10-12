@@ -35,9 +35,21 @@
 
         </div>
         <div class="col-sm-3 col-sm-offset-1">
-            <img src={{ url_for('main.static', filename='img/headshot.png') }} class="img-circle img-thumbnail"
-            alt="Headshot" width="250" height="250">
-
+            <div class="center-div">
+                <img src={{ url_for('main.static', filename='img/headshot.png') }} class="img-circle img-thumbnail"
+                alt="Headshot" width="250" height="250">
+                <div class="center-div">
+                    <a href="https://www.github.com/wcy940418">
+                        <img src={{ url_for('main.static', filename='img/GitHub-64px.png') }} alt="GitHub" width="32" height="32">
+                    </a>
+                    <a href="https://www.linkedin.com/in/troywang" class="center">
+                        <img src={{ url_for('main.static', filename='img/Linkedin-64px.png') }} alt="Linkedin" width="32" height="32">
+                    </a>
+                </div>
+                <div class="center-div">
+                    <a href="{{ url_for('main.static', filename='other/chaoyue_resume.pdf') }}">Resume</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

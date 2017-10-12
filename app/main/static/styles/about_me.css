@@ -14,3 +14,12 @@ h6, .h6 {
   font-weight: normal;
   color: #333;
 }
+
+.center-div {
+    padding-top: 20px;
+    text-align: center;
+}
+
+.selfie-bar {
+    width: 250px;
+}

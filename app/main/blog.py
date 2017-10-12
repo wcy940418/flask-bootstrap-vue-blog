@@ -9,7 +9,6 @@ from . import main
 
 
 KELVIN_ZERO = 273.15
-MAGIC_CODE = "940623"
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 
@@ -161,7 +160,7 @@ def user_register():
         if db_session.query(User).filter_by(username=username).first() is not None:
             flash(username + ' has existed')
             return render_template('register.html'), 400
-        if magiccode != MAGIC_CODE:
+        if magiccode != current_app.config['MAGIC_CODE']:
             flash('Magic Code incorrect')
             return render_template('register.html'), 400
         user = User(username=username, password=password, email=email)
@@ -210,7 +209,7 @@ def api_new_user():
         return jsonify({'status': 'Please enter valid username, password and email'}), 400
     if db_session.query(User).filter_by(username=username).first() is not None:
         return jsonify({'status': 'Username ' + username + ' has existed', 'username': username}), 400
-    if magiccode != MAGIC_CODE:
+    if magiccode != current_app.config['MAGIC_CODE']:
         return jsonify({'status': 'Magic code incorrect'}), 400
     user = User(username=username, password=password, email=email)
     db_session.add(user)

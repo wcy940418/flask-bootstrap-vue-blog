@@ -4,9 +4,9 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
     SSL_DISABLE = False
-    SECRET_KEY = 'Q^\xc7\xc8RI\xba\x98\x9d9\x88%VF-3\xf1\xfe\t\xfa_Tx\x8f'
-    OMW_API_KEY = '73323744bf4b7300b711576a9e8b74eb'
-
+    SECRET_KEY = os.environ.get('SECRET_KEY')
+    OMW_API_KEY = os.environ.get('OMW_API_KEY')
+    MAGIC_CODE = os.environ.get('MAGIC_CODE')
     @staticmethod
     def init_app(app):
         pass
